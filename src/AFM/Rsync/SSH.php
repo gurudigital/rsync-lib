@@ -18,184 +18,172 @@ namespace AFM\Rsync;
  *
  * @author Alberto <albertofem@gmail.com>
  */
-class SSH extends AbstractProtocol
-{
-	/**
-	 * @var string
-	 */
-	protected $executable = "ssh";
+class SSH extends AbstractProtocol {
 
-	/**
-	 * @var string
-	 */
-	protected $host;
+    /**
+     * @var string
+     */
+    protected $executable = "ssh";
 
-	/**
-	 * @var int
-	 */
-	protected $port = 22;
+    /**
+     * @var string
+     */
+    protected $host;
 
-	/**
-	 * @var string
-	 */
-	protected $username;
+    /**
+     * @var int
+     */
+    protected $port = 22;
 
-	/**
-	 * @var null
-	 */
-	protected $publicKey = null;
+    /**
+     * @var string
+     */
+    protected $username;
 
-	/**
-	 * Injects and validates config
-	 *
-	 * @param array $options
-	 */
-	public function __construct(Array $options = array())
-	{
-		$this->setOption($options, 'host', 'setHost');
-		$this->setOption($options, 'port', 'setPort');
-		$this->setOption($options, 'username', 'setUsername');
-		$this->setOption($options, 'public_key', 'setPublicKey');
-	}
+    /**
+     * @var null
+     */
+    protected $publicKey = null;
 
-	/**
-	 * @param $host
-	 */
-	public function setHost($host)
-	{
-		$this->host = $host;
-	}
+    /**
+     * Injects and validates config
+     *
+     * @param array $options
+     */
+    public function __construct(Array $options = array()) {
+        $this->setOption($options, 'executable', 'setExecutable');
+        $this->setOption($options, 'host', 'setHost');
+        $this->setOption($options, 'port', 'setPort');
+        $this->setOption($options, 'username', 'setUsername');
+        $this->setOption($options, 'public_key', 'setPublicKey');
+    }
 
-	/**
-	 * @return mixed
-	 */
-	public function getHost()
-	{
-		return $this->host;
-	}
+    /**
+     * @param $host
+     */
+    public function setHost($host) {
+        $this->host = $host;
+    }
 
-	/**
-	 * @param $port
-	 *
-	 * @throws \InvalidArgumentException If the port is not numeric
-	 */
-	public function setPort($port)
-	{
-		if(!is_int($port))
-			throw new \InvalidArgumentException("SSH port must be an integer");
+    /**
+     * @return mixed
+     */
+    public function getHost() {
+        return $this->host;
+    }
 
-		$this->port = $port;
-	}
+    /**
+     * @param $port
+     *
+     * @throws \InvalidArgumentException If the port is not numeric
+     */
+    public function setPort($port) {
+        if (!is_int($port))
+            throw new \InvalidArgumentException("SSH port must be an integer");
 
-	/**
-	 * @return int
-	 */
-	public function getPort()
-	{
-		return $this->port;
-	}
+        $this->port = $port;
+    }
 
-	/**
-	 * @param $publicKey
-	 * @throws \InvalidArgumentException
-	 */
-	public function setPublicKey($publicKey)
-	{
-		if(!is_readable($publicKey))
-			throw new \InvalidArgumentException("SSH public key '" .$publicKey. "' is not readable");
+    /**
+     * @return int
+     */
+    public function getPort() {
+        return $this->port;
+    }
 
-		$this->publicKey = $publicKey;
-	}
+    /**
+     * @param $publicKey
+     * @throws \InvalidArgumentException
+     */
+    public function setPublicKey($publicKey) {
+        if (!is_readable($publicKey))
+            throw new \InvalidArgumentException("SSH public key '" . $publicKey . "' is not readable");
 
-	/**
-	 * @return null
-	 */
-	public function getPublicKey()
-	{
-		return $this->publicKey;
-	}
+        $this->publicKey = $publicKey;
+    }
 
-	/**
-	 * @param $username
-	 */
-	public function setUsername($username)
-	{
-		$this->username = $username;
-	}
+    /**
+     * @return null
+     */
+    public function getPublicKey() {
+        return $this->publicKey;
+    }
 
-	/**
-	 * @return mixed
-	 */
-	public function getUsername()
-	{
-		return $this->username;
-	}
+    /**
+     * @param $username
+     */
+    public function setUsername($username) {
+        $this->username = $username;
+    }
 
-	/**
-	 * Gets commands for this SSH connection
-	 *
-	 * @param bool $hostConnection
-	 *
-	 * @return string
-	 *
-	 * @throws \InvalidArgumentException If you don't specify a SSH username or host
-	 */
-	public function getCommand($hostConnection = true)
-	{
-		if(is_null($this->username))
-			throw new \InvalidArgumentException("You must specify a SSH username");
+    /**
+     * @return mixed
+     */
+    public function getUsername() {
+        return $this->username;
+    }
 
-		if(is_null($this->host))
-			throw new \InvalidArgumentException("You must specify a SSH host to connect");
+    /**
+     * Gets commands for this SSH connection
+     *
+     * @param bool $hostConnection
+     *
+     * @return string
+     *
+     * @throws \InvalidArgumentException If you don't specify a SSH username or host
+     */
+    public function getCommand($hostConnection = true) {
+        if (is_null($this->username))
+            throw new \InvalidArgumentException("You must specify a SSH username");
 
-		$command = new Command($this->executable);
+        if (is_null($this->host))
+            throw new \InvalidArgumentException("You must specify a SSH host to connect");
 
-		if($this->port != 22)
-			$command->addArgument("p", $this->port);
+        $command = new Command($this->executable);
 
-		if(!is_null($this->publicKey))
-			$command->addArgument("i", $this->publicKey);
+        if ($this->port != 22)
+            $command->addArgument("p", $this->port);
 
-		if($hostConnection)
-			$command->addParameter($this->getHostConnection());
+        if (!is_null($this->publicKey))
+            $command->addArgument("i", $this->publicKey);
 
-		return $command;
-	}
+        if ($hostConnection)
+            $command->addParameter($this->getHostConnection());
 
-	/**
-	 * Gets only connection options, without user@host string
-	 *
-	 * @return string
-	 */
-	public function getConnectionOptions()
-	{
-		return (string) $this->getCommand(false);
-	}
+        return $command;
+    }
 
-	/**
-	 * Gets only host connection, without the rest
-	 * of options
-	 *
-	 * @return string
-	 */
-	public function getHostConnection()
-	{
-		return $this->username . "@" . $this->host;
-	}
+    /**
+     * Gets only connection options, without user@host string
+     *
+     * @return string
+     */
+    public function getConnectionOptions() {
+        return (string) $this->getCommand(false);
+    }
 
-	/**
-	 * @param $executable
-	 */
-	public function setExecutable($executable)
-	{
-		$this->executable = $executable;
-	}
+    /**
+     * Gets only host connection, without the rest
+     * of options
+     *
+     * @return string
+     */
+    public function getHostConnection() {
+        return $this->username . "@" . $this->host;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getExecutable()
-	{
-		return $this->executable;
-	}
+    /**
+     * @param $executable
+     */
+    public function setExecutable($executable) {
+        $this->executable = $executable;
+    }
+
+    /**
+     * @return string
+     */
+    public function getExecutable() {
+        return $this->executable;
+    }
+
 }

@@ -13,120 +13,120 @@ namespace AFM\Rsync\Tests;
 
 use AFM\Rsync\SSH;
 
-class SSHTest extends \PHPUnit_Framework_TestCase
-{
-	public function testValidConfiguration()
-	{
-		$fakePublicKey = __DIR__ . '/fake_key.pub';
+class SSHTest extends \PHPUnit_Framework_TestCase {
 
-		touch($fakePublicKey);
+    public function testValidConfiguration() {
+        $fakePublicKey = __DIR__ . '/fake_key.pub';
 
-		new SSH(array('port' => 1443, 'public_key' => $fakePublicKey));
+        touch($fakePublicKey);
 
-		$this->assertTrue(true);
+        new SSH(array('port' => 1443, 'public_key' => $fakePublicKey));
 
-		unlink($fakePublicKey);
-	}
+        $this->assertTrue(true);
 
-	/**
- 	 * @expectedException \InvalidArgumentException
-	 */
-	public function testInvalidPublicKey()
-	{
-		new SSH(array('public_key' => '/cant/read!'));
-	}
+        unlink($fakePublicKey);
+    }
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testInvalidPortNumber()
-	{
-		new SSH(array('port' => 'not_a_number'));
-	}
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testInvalidPublicKey() {
+        new SSH(array('public_key' => '/cant/read!'));
+    }
 
-	public function testGetConnectionString()
-	{
-		$ssh = new SSH(array('username' => 'test', 'host' => 'test.com'));
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testInvalidPortNumber() {
+        new SSH(array('port' => 'not_a_number'));
+    }
 
-		$actual = $ssh->getCommand();
-		$expected = "ssh test@test.com";
+    public function testGetConnectionString() {
+        $ssh = new SSH(array('username' => 'test', 'host' => 'test.com'));
 
-		$this->assertEquals($expected, $actual);
-	}
+        $actual   = $ssh->getCommand();
+        $expected = "ssh test@test.com";
 
-	public function testGetConnectionNonStandardPort()
-	{
-		$ssh = new SSH(array('username' => 'test', 'host' => 'test.com', 'port' => 231));
+        $this->assertEquals($expected, $actual);
+    }
 
-		$actual = $ssh->getCommand();
-		$expected = "ssh -p '231' test@test.com";
+    public function testGetConnectionNonStandardPort() {
+        $ssh = new SSH(array('username' => 'test', 'host' => 'test.com', 'port' => 231));
 
-		$this->assertEquals($expected, $actual);
-	}
+        $actual   = $ssh->getCommand();
+        $expected = "ssh -p '231' test@test.com";
 
-	public function testGetConnectionWithPublicKey()
-	{
-		$publicKey = "./key.pub";
-		$publicKeyWithSpaces = "./key key.pub";
+        $this->assertEquals($expected, $actual);
+    }
 
-		touch($publicKey);
-		touch($publicKeyWithSpaces);
+    public function testGetConnectionWithPublicKey() {
+        $publicKey           = "./key.pub";
+        $publicKeyWithSpaces = "./key key.pub";
 
-		$ssh = new SSH(array('username' => 'test', 'host' => 'test.com', 'public_key' => $publicKey));
+        touch($publicKey);
+        touch($publicKeyWithSpaces);
 
-		$actual = $ssh->getCommand();
-		$expected = "ssh -i '" .$publicKey. "' test@test.com";
+        $ssh = new SSH(array('username' => 'test', 'host' => 'test.com', 'public_key' => $publicKey));
 
-		$this->assertEquals($expected, $actual);
+        $actual   = $ssh->getCommand();
+        $expected = "ssh -i '" . $publicKey . "' test@test.com";
 
-		$ssh->setPublicKey($publicKeyWithSpaces);
+        $this->assertEquals($expected, $actual);
 
-		$actual = $ssh->getCommand();
-		$expected = "ssh -i '" .$publicKeyWithSpaces. "' test@test.com";
+        $ssh->setPublicKey($publicKeyWithSpaces);
 
-		$this->assertEquals($expected, $actual);
+        $actual   = $ssh->getCommand();
+        $expected = "ssh -i '" . $publicKeyWithSpaces . "' test@test.com";
 
-		unlink($publicKey);
-		unlink($publicKeyWithSpaces);
-	}
+        $this->assertEquals($expected, $actual);
 
-	public function testGetHostConnection()
-	{
-		$ssh = new SSH(array('username' => 'test', 'host' => 'test.com'));
+        unlink($publicKey);
+        unlink($publicKeyWithSpaces);
+    }
 
-		$actual = $ssh->getHostConnection();
-		$expected = "test@test.com";
+    public function testGetHostConnection() {
+        $ssh = new SSH(array('username' => 'test', 'host' => 'test.com'));
 
-		$this->assertEquals($expected, $actual);
-	}
+        $actual   = $ssh->getHostConnection();
+        $expected = "test@test.com";
 
-	public function testGetConnectionOptions()
-	{
-		$ssh = new SSH(array('username' => 'test', 'host' => 'test.com', 'port' => 231, 'public_key' => '/dev/null'));
+        $this->assertEquals($expected, $actual);
+    }
 
-		$actual = $ssh->getConnectionOptions();
-		$expected = "ssh -p '231' -i '/dev/null'";
+    public function testGetConnectionOptions() {
+        $ssh = new SSH(array('username' => 'test', 'host' => 'test.com', 'port' => 231, 'public_key' => '/dev/null'));
 
-		$this->assertEquals($expected, $actual);
-	}
+        $actual   = $ssh->getConnectionOptions();
+        $expected = "ssh -p '231' -i '/dev/null'";
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testGetConnectionNoUsername()
-	{
-		$ssh = new SSH;
+        $this->assertEquals($expected, $actual);
+    }
 
-		$ssh->getCommand();
-	}
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGetConnectionNoUsername() {
+        $ssh = new SSH;
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testGetConnectionNoHost()
-	{
-		$ssh = new SSH(array('username' => 'test'));
+        $ssh->getCommand();
+    }
 
-		$ssh->getCommand();
-	}
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGetConnectionNoHost() {
+        $ssh = new SSH(array('username' => 'test'));
+
+        $ssh->getCommand();
+    }
+
+    public function testSetExecutable() {
+        $ssh = new SSH(array('username' => 'test', 'host' => 'test.com', 'port' => 231, 'executable' => 'c:/cygwin/bin/ssh.exe'));
+
+        $actual   = $ssh->getConnectionOptions();
+        $expected = "c:/cygwin/bin/ssh.exe -p '231'";
+
+        $this->assertEquals($expected, $actual);
+    }
+
 }
